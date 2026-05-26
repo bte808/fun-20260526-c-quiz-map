@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Quiz Map">
+  <rect width="64" height="64" rx="12" fill="#f7f3ea"/>
+  <circle cx="18" cy="20" r="8" fill="#2f8f83"/>
+  <circle cx="44" cy="18" r="7" fill="#e0a21a"/>
+  <circle cx="32" cy="44" r="9" fill="#d85c4a"/>
+  <path d="M25 20h12M21 27l7 10M40 25l-5 12" stroke="#24313b" stroke-width="4" stroke-linecap="round"/>
+</svg>

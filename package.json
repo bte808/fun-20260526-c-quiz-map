@@ -1,0 +1,19 @@
+{
+  "name": "fun-20260526-c-quiz-map",
+  "version": "1.0.0",
+  "description": "A local quiz-result knowledge map for study review planning.",
+  "type": "module",
+  "private": false,
+  "scripts": {
+    "check": "node scripts/check.mjs",
+    "test": "node --test"
+  },
+  "keywords": [
+    "study",
+    "quiz",
+    "knowledge-map",
+    "review",
+    "education"
+  ],
+  "license": "MIT"
+}

@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="Quiz Map turns tagged quiz results into a local concept mastery map and review plan."
+    />
+    <title>Quiz Map</title>
+    <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <header class="app-header">
+        <div>
+          <p class="eyebrow">Local study review tool</p>
+          <h1>Quiz Map</h1>
+          <p class="lede">
+            Convert tagged quiz misses into a concept map, prerequisite risk
+            list, and active-recall prompts.
+          </p>
+        </div>
+        <div class="header-meter" aria-label="Workflow">
+          <span>Quiz</span>
+          <span>Map</span>
+          <span>Review</span>
+        </div>
+      </header>
+
+      <section class="workspace" aria-label="Quiz map workspace">
+        <form class="input-panel" id="quiz-form">
+          <div class="panel-head">
+            <div>
+              <h2>Inputs</h2>
+              <p>Use the sample or paste your own course concepts and quiz rows.</p>
+            </div>
+          </div>
+
+          <label class="field-label" for="concept-map">Concept map</label>
+          <textarea
+            id="concept-map"
+            spellcheck="false"
+            data-testid="concept-map-input"
+          ></textarea>
+          <p class="hint">
+            Format: Concept | prerequisite A, prerequisite B | optional note
+          </p>
+
+          <label class="field-label" for="quiz-results">Quiz results CSV</label>
+          <textarea
+            id="quiz-results"
+            spellcheck="false"
+            data-testid="quiz-results-input"
+          ></textarea>
+          <p class="hint">
+            Required headers: question, concept, stage, result, confidence, note.
+            Use semicolons for multi-concept items.
+          </p>
+
+          <div class="actions" aria-label="Input actions">
+            <button type="submit" class="primary" data-testid="analyze-button">
+              Analyze
+            </button>
+            <button type="button" id="sample-button">Sample</button>
+            <button type="button" id="reset-button">Reset</button>
+          </div>
+        </form>
+
+        <section class="output-panel" aria-live="polite">
+          <div class="panel-head">
+            <div>
+              <h2>Review map</h2>
+              <p id="run-summary" data-testid="run-summary">
+                Ready for a tagged quiz sample.
+              </p>
+            </div>
+            <div class="export-actions">
+              <button type="button" id="copy-button">Copy report</button>
+              <button type="button" id="download-button">JSON</button>
+            </div>
+          </div>
+
+          <div class="status-grid" id="status-grid" data-testid="status-grid"></div>
+
+          <div class="map-area" aria-label="Knowledge map">
+            <svg
+              id="knowledge-map"
+              role="img"
+              aria-label="Concept mastery map"
+              viewBox="0 0 880 500"
+              preserveAspectRatio="xMidYMid meet"
+              data-testid="knowledge-map"
+            ></svg>
+          </div>
+
+          <div class="split-output">
+            <section>
+              <h3>Priority concepts</h3>
+              <div id="priority-list" class="priority-list"></div>
+            </section>
+            <section>
+              <h3>Recall prompts</h3>
+              <ol id="prompt-list" class="prompt-list"></ol>
+            </section>
+          </div>
+
+          <section>
+            <h3>Concept table</h3>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Concept</th>
+                    <th>Status</th>
+                    <th>Current</th>
+                    <th>Delta</th>
+                    <th>Questions</th>
+                    <th>Risk note</th>
+                  </tr>
+                </thead>
+                <tbody id="concept-table"></tbody>
+              </table>
+            </div>
+          </section>
+
+          <div id="warnings" class="warnings" data-testid="warnings"></div>
+          <textarea id="copy-buffer" class="copy-buffer" readonly></textarea>
+        </section>
+      </section>
+    </main>
+
+    <script type="module" src="./src/app.js"></script>
+  </body>
+</html>
