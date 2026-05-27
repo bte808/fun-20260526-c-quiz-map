@@ -335,6 +335,14 @@ textarea:focus {
   margin: 8px 0;
 }
 
+.priority-item .next-step {
+  color: var(--ink);
+}
+
+.priority-item .next-step strong {
+  font-size: inherit;
+}
+
 .bar {
   height: 8px;
   border-radius: 999px;

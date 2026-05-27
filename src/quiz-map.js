@@ -181,7 +181,8 @@ export function analyzeQuizMap(conceptText, quizText) {
       status: statusForScore(currentScore),
       riskIndex: 0,
       prerequisiteRisks: [],
-      riskNote: ""
+      riskNote: "",
+      nextStep: ""
     };
   });
 
@@ -212,6 +213,7 @@ export function analyzeQuizMap(conceptText, quizText) {
         ? "blocked"
         : concept.status;
     concept.riskNote = buildRiskNote(concept);
+    concept.nextStep = buildNextStep(concept);
   }
 
   concepts.sort((a, b) => {
@@ -253,6 +255,13 @@ export function buildMarkdownReport(analysis) {
         concept.currentScore
       )} | ${formatDelta(concept.delta)} | ${escapePipes(concept.riskNote)} |`
     );
+  }
+
+  const reviewActions = analysis.concepts.filter((concept) => concept.status !== "secure");
+  const nextActions = reviewActions.length ? reviewActions.slice(0, 6) : analysis.concepts.slice(0, 3);
+  lines.push("", "## Next Review Actions", "");
+  for (const concept of nextActions) {
+    lines.push(`- **${escapePipes(concept.name)}:** ${escapePipes(concept.nextStep)}`);
   }
 
   lines.push("", "## Recall Prompts", "");
@@ -322,6 +331,34 @@ function buildRiskNote(concept) {
     bits.push("stable on this sample");
   }
   return bits.join("; ");
+}
+
+function buildNextStep(concept) {
+  if (!Number.isFinite(concept.currentScore)) {
+    return "Write one diagnostic question before treating this concept as mapped.";
+  }
+  if (concept.prerequisiteRisks.length) {
+    return `Review ${concept.prerequisiteRisks.join(
+      " and "
+    )} first, then solve one mixed question that links those prerequisites to ${concept.name}.`;
+  }
+  if (concept.highConfidenceMisses.length) {
+    const missed = concept.highConfidenceMisses[0];
+    return `Redo "${missed.question}" and write the rule that would have caught the confident miss.`;
+  }
+  if (concept.currentScore < 0.42) {
+    return "Do three fast retrieval checks, then make one worked example from memory.";
+  }
+  if (concept.currentScore < 0.62) {
+    return "Make one near-miss example and explain why it is not the target concept.";
+  }
+  if (concept.delta !== null && concept.delta < 0) {
+    return "Compare the baseline and current attempts, then retest once tomorrow.";
+  }
+  if (concept.currentScore < 0.82) {
+    return "Keep it warm with one spaced review question after the urgent items.";
+  }
+  return "Keep it as a reference concept while repairing weaker items.";
 }
 
 function buildPrompts(concepts) {

@@ -216,6 +216,7 @@ function renderPriorities(analysis) {
           )}</span>
         </div>
         <p>${escapeHtml(concept.riskNote)}</p>
+        <p class="next-step"><strong>Next:</strong> ${escapeHtml(concept.nextStep)}</p>
         <div class="bar" aria-label="Current mastery">
           <span style="width:${masteryWidth(concept.currentScore)}"></span>
         </div>

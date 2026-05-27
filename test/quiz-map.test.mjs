@@ -28,8 +28,11 @@ test("builds a review analysis without fabricated certainty", () => {
   const analysis = completeAnalysis(sampleConceptMap, sampleQuizCsv);
   assert.match(analysis.summary, /high-confidence misses/);
   assert.ok(analysis.concepts.some((concept) => concept.name === "Sampling bias"));
+  const samplingBias = analysis.concepts.find((concept) => concept.name === "Sampling bias");
+  assert.match(samplingBias.nextStep, /confident miss|retrieval|near-miss|diagnostic|Review/);
   assert.ok(analysis.prompts.length >= 3);
   assert.match(analysis.markdown, /does not verify textbook truth/);
+  assert.match(analysis.markdown, /## Next Review Actions/);
   assert.doesNotMatch(analysis.markdown, /NaN/);
 });
 

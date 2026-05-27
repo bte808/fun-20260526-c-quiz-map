@@ -17,6 +17,7 @@ The app then creates:
 - A priority list for concepts that need review.
 - A prerequisite-risk note when a later concept depends on a weak earlier one.
 - Recall prompts for teach-back, near-miss examples, and confident mistakes.
+- Per-concept next review actions so the map turns into a short study checklist.
 - A copyable Markdown report and downloadable JSON report.
 
 ## Good Study And Research Uses
@@ -98,7 +99,8 @@ items use semicolons in the concept column.
 3. Paste quiz rows from a short self-check.
 4. Press Analyze.
 5. Review the highest-risk concepts first.
-6. Copy the Markdown report into a study log or export JSON for later tracking.
+6. Use the next review actions as a short checklist before another quiz pass.
+7. Copy the Markdown report into a study log or export JSON for later tracking.
 
 ## Later Extensions
 
