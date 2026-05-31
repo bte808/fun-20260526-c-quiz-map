@@ -4,6 +4,8 @@ Quiz Map is a small local study tool that turns tagged quiz results into a
 concept mastery map, prerequisite risk list, and active-recall prompts. It runs
 entirely in the browser with static HTML, CSS, and JavaScript.
 
+Live demo: <https://bte808.github.io/fun-20260526-c-quiz-map/>
+
 ## What It Does
 
 Paste two plain-text inputs:
