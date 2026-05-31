@@ -21,6 +21,7 @@ const elements = {
   sampleButton: document.querySelector("#sample-button"),
   resetButton: document.querySelector("#reset-button"),
   copyButton: document.querySelector("#copy-button"),
+  csvButton: document.querySelector("#csv-button"),
   downloadButton: document.querySelector("#download-button"),
   summary: document.querySelector("#run-summary"),
   statusGrid: document.querySelector("#status-grid"),
@@ -68,17 +69,23 @@ elements.copyButton.addEventListener("click", async () => {
   }
 });
 
+elements.csvButton.addEventListener("click", () => {
+  if (!latestAnalysis) return;
+  downloadText(
+    latestAnalysis.flashcardCsv,
+    "quiz-map-review-cards.csv",
+    "text/csv;charset=utf-8"
+  );
+  setActionLabel(elements.csvButton, "CSV saved");
+});
+
 elements.downloadButton.addEventListener("click", () => {
   if (!latestAnalysis) return;
-  const blob = new Blob([JSON.stringify(latestAnalysis, null, 2)], {
-    type: "application/json"
-  });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement("a");
-  link.href = url;
-  link.download = "quiz-map-report.json";
-  link.click();
-  URL.revokeObjectURL(url);
+  downloadText(
+    JSON.stringify(latestAnalysis, null, 2),
+    "quiz-map-report.json",
+    "application/json"
+  );
   setActionLabel(elements.downloadButton, "Saved");
 });
 
@@ -109,7 +116,8 @@ function renderStats(analysis) {
     ["Concepts", String(analysis.concepts.length)],
     ["Quiz tags", String(analysis.quizItemCount)],
     ["Needs work", String(urgent + fragile + blocked)],
-    ["Secure", String(secure)]
+    ["Secure", String(secure)],
+    ["Cards", String(analysis.reviewCards.length)]
   ];
   elements.statusGrid.replaceChildren(
     ...stats.map(([label, value]) => {
@@ -277,12 +285,17 @@ function renderWarnings(analysis) {
 function layoutConcepts(concepts) {
   const byKey = new Map(concepts.map((concept) => [concept.key, concept]));
   const memo = new Map();
-  const levelOf = (concept) => {
+  const levelOf = (concept, path = new Set()) => {
     if (memo.has(concept.key)) return memo.get(concept.key);
+    if (path.has(concept.key)) {
+      return 0;
+    }
+    const nextPath = new Set(path);
+    nextPath.add(concept.key);
     const prereqLevels = concept.prerequisites
       .map((name) => byKey.get(name.toLowerCase()))
       .filter(Boolean)
-      .map(levelOf);
+      .map((prereq) => levelOf(prereq, nextPath));
     const level = prereqLevels.length ? Math.max(...prereqLevels) + 1 : 0;
     memo.set(concept.key, Math.min(level, 4));
     return memo.get(concept.key);
@@ -329,6 +342,16 @@ function svgText(x, y, content, className) {
 
 function masteryWidth(value) {
   return Number.isFinite(value) ? `${Math.max(6, Math.round(value * 100))}%` : "6%";
+}
+
+function downloadText(content, filename, type) {
+  const blob = new Blob([content], { type });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = filename;
+  link.click();
+  window.setTimeout(() => URL.revokeObjectURL(url), 0);
 }
 
 function setActionLabel(button, temporaryLabel) {

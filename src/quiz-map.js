@@ -55,6 +55,8 @@ export function parseConceptMap(text) {
     }
   }
 
+  warnings.push(...findPrerequisiteCycleWarnings(conceptByKey));
+
   return {
     concepts: order.map((key) => conceptByKey.get(key)),
     warnings
@@ -223,11 +225,14 @@ export function analyzeQuizMap(conceptText, quizText) {
 
   const prompts = buildPrompts(concepts);
   const summary = buildSummary(concepts, parsedQuiz.items);
+  const reviewCards = buildReviewCards(concepts);
 
   return {
     generatedAt: new Date().toISOString(),
     summary,
     concepts,
+    reviewCards,
+    flashcardCsv: "",
     prompts,
     warnings,
     quizItemCount: parsedQuiz.items.length,
@@ -280,7 +285,24 @@ export function buildMarkdownReport(analysis) {
 export function completeAnalysis(conceptText, quizText) {
   const analysis = analyzeQuizMap(conceptText, quizText);
   analysis.markdown = buildMarkdownReport(analysis);
+  analysis.flashcardCsv = buildFlashcardCsv(analysis);
   return analysis;
+}
+
+export function buildFlashcardCsv(analysis) {
+  const rows = [
+    ["Front", "Back", "Concept", "Status", "Risk note", "Source"],
+    ...(analysis.reviewCards ?? buildReviewCards(analysis.concepts)).map((card) => [
+      card.front,
+      card.back,
+      card.concept,
+      card.status,
+      card.riskNote,
+      card.source
+    ])
+  ];
+
+  return rows.map((row) => row.map(formatCsvCell).join(",")).join("\n");
 }
 
 export function statusForScore(score) {
@@ -398,6 +420,80 @@ function buildPrompts(concepts) {
   return [...new Set(prompts)].slice(0, 6);
 }
 
+function buildReviewCards(concepts) {
+  const candidates = concepts.filter((concept) => concept.status !== "secure");
+  const selected = candidates.length ? candidates.slice(0, 8) : concepts.slice(0, 4);
+  const cards = [];
+
+  for (const concept of selected) {
+    cards.push({
+      front: `What is the next review move for ${concept.name}?`,
+      back: concept.nextStep,
+      concept: concept.name,
+      status: concept.status,
+      riskNote: concept.riskNote,
+      source: "next-step"
+    });
+
+    if (concept.highConfidenceMisses.length) {
+      const missed = concept.highConfidenceMisses[0];
+      cards.push({
+        front: `What rule would prevent the miss on "${missed.question}"?`,
+        back: missed.note
+          ? `${missed.note}. Then ${concept.nextStep}`
+          : concept.nextStep,
+        concept: concept.name,
+        status: concept.status,
+        riskNote: concept.riskNote,
+        source: `quiz row ${missed.rowNumber}`
+      });
+    }
+  }
+
+  return cards.slice(0, 10);
+}
+
+function findPrerequisiteCycleWarnings(conceptByKey) {
+  const warnings = [];
+  const seen = new Set();
+  const visited = new Set();
+  const active = [];
+
+  const visit = (key) => {
+    if (active.includes(key)) {
+      const cycle = [...active.slice(active.indexOf(key)), key];
+      const signature = [...new Set(cycle)].sort().join("|");
+      if (!seen.has(signature)) {
+        seen.add(signature);
+        warnings.push(
+          `Circular prerequisite path: ${cycle
+            .map((cycleKey) => conceptByKey.get(cycleKey)?.name ?? cycleKey)
+            .join(" -> ")}.`
+        );
+      }
+      return;
+    }
+
+    if (visited.has(key)) return;
+    visited.add(key);
+    active.push(key);
+    const concept = conceptByKey.get(key);
+    for (const prereqName of concept?.prerequisites ?? []) {
+      const prereqKey = prereqName.toLowerCase();
+      if (conceptByKey.has(prereqKey)) {
+        visit(prereqKey);
+      }
+    }
+    active.pop();
+  };
+
+  for (const key of conceptByKey.keys()) {
+    visit(key);
+  }
+
+  return warnings;
+}
+
 function pickCurrentItems(items) {
   const current = items.filter((item) => CURRENT_STAGES.has(item.stage));
   return current.length ? current : items;
@@ -479,4 +575,12 @@ function parseCsv(text) {
 
 function escapePipes(value) {
   return String(value ?? "").replace(/\|/g, "\\|");
+}
+
+function formatCsvCell(value) {
+  const text = String(value ?? "");
+  if (/[",\n\r]/.test(text)) {
+    return `"${text.replace(/"/g, '""')}"`;
+  }
+  return text;
 }

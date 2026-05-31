@@ -36,6 +36,20 @@ test("builds a review analysis without fabricated certainty", () => {
   assert.doesNotMatch(analysis.markdown, /NaN/);
 });
 
+test("exports a focused review-card CSV", () => {
+  const analysis = completeAnalysis(sampleConceptMap, sampleQuizCsv);
+  assert.ok(analysis.reviewCards.length >= 4);
+  assert.match(analysis.flashcardCsv, /^Front,Back,Concept,Status,Risk note,Source/);
+  assert.match(analysis.flashcardCsv, /Sampling bias/);
+  assert.match(analysis.flashcardCsv, /quiz row 12/);
+  assert.doesNotMatch(analysis.flashcardCsv, /undefined|NaN/);
+});
+
+test("warns about circular prerequisites instead of hiding the input issue", () => {
+  const parsed = parseConceptMap("A | B | first\nB | A | second");
+  assert.match(parsed.warnings.join("\n"), /Circular prerequisite path: A -> B -> A/);
+});
+
 test("status thresholds are stable", () => {
   assert.equal(statusForScore(0.9), "secure");
   assert.equal(statusForScore(0.7), "steady");

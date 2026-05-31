@@ -19,6 +19,10 @@ The app then creates:
 - Recall prompts for teach-back, near-miss examples, and confident mistakes.
 - Per-concept next review actions so the map turns into a short study checklist.
 - A copyable Markdown report and downloadable JSON report.
+- A focused review-card CSV that can be imported into a spreadsheet or flashcard
+  app after a quiz pass.
+- Warnings for input problems such as missing CSV columns, quiz-only concepts,
+  implied prerequisites, and circular prerequisite paths.
 
 ## Good Study And Research Uses
 
@@ -32,6 +36,17 @@ officially, verify textbook truth, infer hidden knowledge, or generate citations
 If you use formulas, course concepts, or research methods in your own input,
 check them against your textbook, lecture notes, paper, or instructor feedback.
 The built-in rows are example data only.
+
+## Why Star It
+
+- It is local-first: paste course or lab quiz traces without sending them to a
+  service.
+- It turns tagged misses into a concrete review queue instead of another flat
+  score summary.
+- It exports Markdown, JSON, and review-card CSV, so the output fits a study
+  log, spreadsheet, or flashcard workflow.
+- It is small static-web code that is easy to fork for a class, reading group,
+  or teaching-assistant review session.
 
 ## Why It Is Interesting
 
@@ -101,6 +116,8 @@ items use semicolons in the concept column.
 5. Review the highest-risk concepts first.
 6. Use the next review actions as a short checklist before another quiz pass.
 7. Copy the Markdown report into a study log or export JSON for later tracking.
+8. Download the review-card CSV when you want the weakest concepts as a compact
+   flashcard deck.
 
 ## Later Extensions
 

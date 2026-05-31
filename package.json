@@ -13,7 +13,10 @@
     "quiz",
     "knowledge-map",
     "review",
-    "education"
+    "education",
+    "retrieval-practice",
+    "flashcards",
+    "local-first"
   ],
   "license": "MIT"
 }
